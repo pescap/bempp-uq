@@ -9,7 +9,7 @@ Includes:
 - projection.py Routines to evaluate the transfer operators between grids for P1 elements
 - login.py Minor modifications of the original Bempp code
 
-A Bempp Docker image is easily accessible following: https://bempp.com/download/docker/
+A Bempp Docker image is easily accessible at: https://bempp.com/download/docker/
 
 ---
 ![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)
