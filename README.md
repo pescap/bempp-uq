@@ -8,4 +8,4 @@ Includes:
 - projection.py Routines to evaluate the transfer operators between grids for P1 elements
 - login.py Minor modifications of the original Bempp code
 
-![alt text](/transformationk.pdf?raw=true "Optional Title")
+![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)
