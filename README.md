@@ -5,7 +5,6 @@ Includes:
 - (TP Main) Tutorial to solve the Transmission Problem (TP) and analyze the convergence of GMRES
 - (Combination Technique) Implementation of the CT for the TP by the unit sphere (work in progress)
 - (Tensor Operator Solver) Solve preconditioned tensor operator equations with GMRES
-
-projection.py Routines to evaluate the transfer operators between grids for P1 elements
-login.py Minor modifications of the original Bempp code
+- projection.py Routines to evaluate the transfer operators between grids for P1 elements
+- login.py Minor modifications of the original Bempp code
 
