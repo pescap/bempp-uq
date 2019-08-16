@@ -8,4 +8,4 @@ Includes:
 - projection.py Routines to evaluate the transfer operators between grids for P1 elements
 - login.py Minor modifications of the original Bempp code
 
-![alt text](https://www.google.com/url?sa=i&source=images&cd=&ved=2ahUKEwiqveaPpYfkAhVKJhoKHQ3AA9UQjRx6BAgBEAQ&url=https%3A%2F%2Fwww.target.com%2Fp%2Fgoogle-vision-kit-aiy%2F-%2FA-53417081&psig=AOvVaw0noFlzB9vJHEwxA-xIXr4u&ust=1566041439676330)
+![alt text](https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png)
