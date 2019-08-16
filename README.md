@@ -3,4 +3,6 @@ A Python/Bempp-based plug-in for uncertainty quantification by random domains.
 Includes:
 - (FOA) Tutorials to evaluate the shape derivative for both sound-soft and sound-hard Helmholtz scattering problems;
 - (TP Main) Tutorial to solve the Transmission Problem (TP) and analyze the convergence of GMRES
-
+- projection.py Routines to evaluate the transfer operators between grids for P1 elements
+- (Combination Technique) Implementation of the CT for the TP by the unit sphere (work in progress)
+- (Tensor Operator Solver) Solve preconditioned tensor operator equations with GMRES
