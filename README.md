@@ -10,4 +10,5 @@ Includes:
 
 
 ![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)
-"Example of transformed boundaries respect to $t$ meshed with $3,249$ vertices"
+*Example of transformed boundaries respect to $t$ meshed with $3,249$ vertices*
+
