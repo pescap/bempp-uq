@@ -12,6 +12,5 @@ Includes:
 A Bempp Docker image is easily accessible at: https://bempp.com/download/docker/
 
 ---
-![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)
-*<p align="center">Example of transformed boundaries respect to t meshed with 3,249 vertices</p>*
+![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)*<p align="center">Example of transformed boundaries respect to t meshed with 3,249 vertices</p>*
 
