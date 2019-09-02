@@ -1,5 +1,8 @@
 # Bempp-UQ
 A Python/Bempp-based plug-in for uncertainty quantification by random domains. 
+Refer to: HELMHOLTZ SCATTERING BY RANDOM DOMAINS: FIRST-ORDER SPARSE BOUNDARY ELEMENTS APPROXIMATION
+
+Preprint: http://arxiv.org/abs/1908.11670 
 
 Includes:
 - (FOA) Tutorials to evaluate the shape derivative for both sound-soft and sound-hard Helmholtz scattering problems
