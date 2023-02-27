@@ -1,8 +1,19 @@
 # Bempp-UQ
 A Python/Bempp-based plug-in for uncertainty quantification by random domains. 
-Refer to: HELMHOLTZ SCATTERING BY RANDOM DOMAINS: FIRST-ORDER SPARSE BOUNDARY ELEMENTS APPROXIMATION
+Refer to: Helmholtz scattering by random domains: first-order sparse boundary element approximation
 
-Preprint: http://arxiv.org/abs/1908.11670 
+```
+@article{escapil2020helmholtz,
+  title={Helmholtz scattering by random domains: first-order sparse boundary element approximation},
+  author={Escapil-Inchausp{\'e}, Paul and Jerez-Hanckes, Carlos},
+  journal={SIAM Journal on Scientific Computing},
+  volume={42},
+  number={5},
+  pages={A2561--A2592},
+  year={2020},
+  publisher={SIAM}
+}
+```
 
 Includes:
 - (FOA) Tutorials to evaluate the shape derivative for both sound-soft and sound-hard Helmholtz scattering problems
@@ -17,3 +28,4 @@ A Bempp Docker image is easily accessible at: https://bempp.com/download/docker/
 ---
 ![alt text](https://i.ibb.co/YQ9Bqpt/transformation.png)*<p align="center">Example of transformed boundaries respect to t meshed with 3,249 vertices</p>*
 
+This code is being refactored as a package for general purpose UQ.
