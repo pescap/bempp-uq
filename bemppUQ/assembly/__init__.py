@@ -1,5 +1,3 @@
-__all__ = [
-    "operators"
-    ]
+__all__ = ["operators"]
 
 from . import operators

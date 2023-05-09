@@ -4,8 +4,9 @@ import scipy.sparse.linalg
 from bempp.api.assembly import GridFunction
 from bempp.api.assembly import BoundaryOperator
 
+
 def rescale(A, d1, d2):
-    #Rescale the 2x2 block operator matsrix A
+    # Rescale the 2x2 block operator matsrix A
     B = bempp.api.BlockedOperator(2, 2)
     for i in range(2):
         for j in range(2):
@@ -14,6 +15,7 @@ def rescale(A, d1, d2):
     B[1, 0] = B[1, 0] * (d1 / d2)
 
     return B
+
 
 def get_h(grid):
     # routine that gives the exact value of h defined as the maximum length of the triangles
@@ -30,13 +32,18 @@ def relative_error(self, fun, element=None):
     """Compute the relative L^2 error compared to a given analytic function."""
     from bempp.api.integration import gauss_triangle_points_and_weights
     import numpy as np
+
     p_normal = np.array([[0]])
     global_diff = 0
     fun_l2_norm = 0
     accuracy_order = self.parameters.quadrature.far.single_order
     points, weights = gauss_triangle_points_and_weights(accuracy_order)
     npoints = points.shape[1]
-    element_list = [element] if element is not None else list(self.grid.leaf_view.entity_iterator(0))
+    element_list = (
+        [element]
+        if element is not None
+        else list(self.grid.leaf_view.entity_iterator(0))
+    )
     for element in element_list:
         integration_elements = element.geometry.integration_elements(points)
         normal = element.geometry.normals(p_normal).reshape(3)
@@ -44,16 +51,17 @@ def relative_error(self, fun, element=None):
         fun_vals = np.zeros((self.component_count, npoints), dtype=self.dtype)
         for j in range(npoints):
             fun_vals[:, j] = fun(global_dofs[:, j], normal)
-        diff = np.sum(np.abs(self.evaluate(element, points) - fun_vals)**2, axis=0)
+        diff = np.sum(np.abs(self.evaluate(element, points) - fun_vals) ** 2, axis=0)
         global_diff += np.sum(diff * integration_elements * weights)
-        abs_fun_squared = np.sum(np.abs(fun_vals)**2, axis=0)
+        abs_fun_squared = np.sum(np.abs(fun_vals) ** 2, axis=0)
         fun_l2_norm += np.sum(abs_fun_squared * integration_elements * weights)
-    return np.sqrt(global_diff/fun_l2_norm)
+    return np.sqrt(global_diff / fun_l2_norm)
+
 
 import time
 
-class _it_counter(object):
 
+class _it_counter(object):
     def __init__(self, store_residuals):
         self._count = 0
         self._store_residuals = store_residuals
@@ -68,8 +76,13 @@ class _it_counter(object):
             current_ta = time.time()
             self._times.append(current_ta - self._ta)
             self._ta = current_ta
-            print('iteration -', self._count,"|| residual -", np.linalg.norm(x), self._times[-1])
-
+            print(
+                "iteration -",
+                self._count,
+                "|| residual -",
+                np.linalg.norm(x),
+                self._times[-1],
+            )
 
     @property
     def count(self):
@@ -78,37 +91,45 @@ class _it_counter(object):
     @property
     def residuals(self):
         return self._residuals
-    
+
     @property
     def times(self):
         return self._times
-    
 
-def gmres(A, b, tol=1E-5, restart=None, maxiter=None, use_strong_form=False, return_residuals=False):
+
+def gmres(
+    A,
+    b,
+    tol=1e-5,
+    restart=None,
+    maxiter=None,
+    use_strong_form=False,
+    return_residuals=False,
+):
     """Interface to the scipy.sparse.linalg.gmres function.
 
     This function behaves like the scipy.sparse.linalg.gmres function. But
     instead of a linear operator and a vector b it can take a boundary operator
     and a grid function. In this case, the result is returned as a grid function in the
     correct space.
-    
+
     """
     import bempp.api
     import time
 
-    if not isinstance(A, BoundaryOperator) and use_strong_form==True:
+    if not isinstance(A, BoundaryOperator) and use_strong_form == True:
         raise ValueError("Strong form only with BoundaryOperator")
     if isinstance(A, BoundaryOperator) and not isinstance(b, GridFunction):
         raise ValueError("Instance Error")
-    
 
     # Assemble weak form before the logging messages
-    
+
     if isinstance(A, BoundaryOperator) and isinstance(b, GridFunction):
         if use_strong_form:
             if not A.range.is_compatible(b.space):
                 raise ValueError(
-                    "The range of A and the space of A must have the same number of unknowns if the strong form is used.")
+                    "The range of A and the space of A must have the same number of unknowns if the strong form is used."
+                )
             A_op = A.strong_form()
             b_vec = b.coefficients
         else:
@@ -120,12 +141,11 @@ def gmres(A, b, tol=1E-5, restart=None, maxiter=None, use_strong_form=False, ret
 
     callback = _it_counter(return_residuals)
 
-    
     start_time = time.time()
-    x, info = scipy.sparse.linalg.gmres(A_op, b_vec,
-                                        tol=tol, restart=restart, maxiter=maxiter, callback=callback)
+    x, info = scipy.sparse.linalg.gmres(
+        A_op, b_vec, tol=tol, restart=restart, maxiter=maxiter, callback=callback
+    )
     end_time = time.time()
-    
 
     if isinstance(A, BoundaryOperator) and isinstance(b, GridFunction):
         res_fun = GridFunction(A.domain, coefficients=x.ravel())

@@ -1,4 +1,4 @@
-import bempp.api 
+import bempp.api
 import numpy as np
 
 _l_s = 0
@@ -15,8 +15,7 @@ def get_gmsh_file():
     import os
     import tempfile
 
-    geo, geo_name = tempfile.mkstemp(
-        suffix='.geo', dir=bempp.api.TMP_PATH, text=True)
+    geo, geo_name = tempfile.mkstemp(suffix=".geo", dir=bempp.api.TMP_PATH, text=True)
     geo_file = os.fdopen(geo, "w")
     msh_name = os.path.splitext(geo_name)[0] + ".msh"
     return (geo_file, geo_name, msh_name)
@@ -28,8 +27,7 @@ def __generate_grid_from_gmsh_string(gmsh_string):
     import os
     import tempfile
 
-    handle, fname = tempfile.mkstemp(
-        suffix='.msh', dir=bempp.api.TMP_PATH, text=True)
+    handle, fname = tempfile.mkstemp(suffix=".msh", dir=bempp.api.TMP_PATH, text=True)
     with os.fdopen(handle, "w") as f:
         f.write(gmsh_string)
     grid = bempp.api.import_grid(fname)
@@ -38,8 +36,7 @@ def __generate_grid_from_gmsh_string(gmsh_string):
 
 
 def __generate_grid_from_geo_string(geo_string):
-    """Helper routine that implements the grid generation
-    """
+    """Helper routine that implements the grid generation"""
 
     import os
     import subprocess
@@ -52,11 +49,10 @@ def __generate_grid_from_geo_string(geo_string):
         f.write(geo_string)
         f.close()
 
-        fnull = open(os.devnull, 'w')
+        fnull = open(os.devnull, "w")
         cmd = gmsh_command + " -2 " + geo_name
         try:
-            subprocess.check_call(
-                cmd, shell=True, stdout=fnull, stderr=fnull)
+            subprocess.check_call(cmd, shell=True, stdout=fnull, stderr=fnull)
         except:
             print("The following command failed: " + cmd)
             fnull.close()
@@ -70,17 +66,15 @@ def __generate_grid_from_geo_string(geo_string):
     os.remove(msh_name)
     return grid
 
-def _make_word(geo,h):
-    intro = "lc = "+str(h)+";\n"
+
+def _make_word(geo, h):
+    intro = "lc = " + str(h) + ";\n"
     outro = "\nMesh.Algorithm = 6;"
-    return __generate_grid_from_geo_string(intro+geo+outro)
-
-
+    return __generate_grid_from_geo_string(intro + geo + outro)
 
 
 def letters_m(h=0.1):
-    return _make_word(_m(0,0),h)
-
+    return _make_word(_m(0, 0), h)
 
 
 _twelve = """Line(ls+1) = {ls+1,ls+2};
@@ -155,42 +149,143 @@ _twelve = """Line(ls+1) = {ls+1,ls+2};
            Plane Surface(ls+13) = {ls+13};"""
 
 
-def _m(x=0,y=0):
+def _m(x=0, y=0):
     """Return gmsh code for a letter E with bottom left corner at (x,y)."""
     global _l_s
-    out = "ls = "+str(_l_s)+""";
-           Point(ls+1) = {"""+str(x)+","+str(y)+""",1,lc};
-           Point(ls+2) = {"""+str(x+.5)+","+str(y)+""",1,lc};
-           Point(ls+3) = {"""+str(x+.5)+","+str(y+3)+""",1,lc};
-           Point(ls+4) = {"""+str(x+1.5)+","+str(y+1)+""",1,lc};
-           Point(ls+5) = {"""+str(x+2.5)+","+str(y+3)+""",1,lc};
-           Point(ls+6) = {"""+str(x+2.5)+","+str(y)+""",1,lc};
-           Point(ls+7) = {"""+str(x+3)+","+str(y)+""",1,lc};
-           Point(ls+8) = {"""+str(x+3)+","+str(y+3.92)+""",1,lc};
-           Point(ls+9) = {"""+str(x+2.3)+","+str(y+3.92)+""",1,lc};
-           Point(ls+10) = {"""+str(x+1.5)+","+str(y+2.32)+""",1,lc};
-           Point(ls+11) = {"""+str(x+0.9)+","+str(y+3.92)+""",1,lc};
-           Point(ls+12) = {"""+str(x)+","+str(y+3.92)+""",1,lc};
+    out = (
+        "ls = "
+        + str(_l_s)
+        + """;
+           Point(ls+1) = {"""
+        + str(x)
+        + ","
+        + str(y)
+        + """,1,lc};
+           Point(ls+2) = {"""
+        + str(x + 0.5)
+        + ","
+        + str(y)
+        + """,1,lc};
+           Point(ls+3) = {"""
+        + str(x + 0.5)
+        + ","
+        + str(y + 3)
+        + """,1,lc};
+           Point(ls+4) = {"""
+        + str(x + 1.5)
+        + ","
+        + str(y + 1)
+        + """,1,lc};
+           Point(ls+5) = {"""
+        + str(x + 2.5)
+        + ","
+        + str(y + 3)
+        + """,1,lc};
+           Point(ls+6) = {"""
+        + str(x + 2.5)
+        + ","
+        + str(y)
+        + """,1,lc};
+           Point(ls+7) = {"""
+        + str(x + 3)
+        + ","
+        + str(y)
+        + """,1,lc};
+           Point(ls+8) = {"""
+        + str(x + 3)
+        + ","
+        + str(y + 3.92)
+        + """,1,lc};
+           Point(ls+9) = {"""
+        + str(x + 2.3)
+        + ","
+        + str(y + 3.92)
+        + """,1,lc};
+           Point(ls+10) = {"""
+        + str(x + 1.5)
+        + ","
+        + str(y + 2.32)
+        + """,1,lc};
+           Point(ls+11) = {"""
+        + str(x + 0.9)
+        + ","
+        + str(y + 3.92)
+        + """,1,lc};
+           Point(ls+12) = {"""
+        + str(x)
+        + ","
+        + str(y + 3.92)
+        + """,1,lc};
 
-           Point(ls+13) = {"""+str(x)+","+str(y)+""",0,lc};
-           Point(ls+14) = {"""+str(x+.5)+","+str(y)+""",0,lc};
-           Point(ls+15) = {"""+str(x+.5)+","+str(y+3)+""",0,lc};
-           Point(ls+16) = {"""+str(x+1.5)+","+str(y+1)+""",0,lc};
-           Point(ls+17) = {"""+str(x+2.5)+","+str(y+3)+""",0,lc};
-           Point(ls+18) = {"""+str(x+2.5)+","+str(y)+""",0,lc};
-           Point(ls+19) = {"""+str(x+3)+","+str(y)+""",0,lc};
-           Point(ls+20) = {"""+str(x+3)+","+str(y+3.92)+""",0,lc};
-           Point(ls+21) = {"""+str(x+2.3)+","+str(y+3.92)+""",0,lc};
-           Point(ls+22) = {"""+str(x+1.5)+","+str(y+2.32)+""",0,lc};
-           Point(ls+23) = {"""+str(x+0.9)+","+str(y+3.92)+""",0,lc};
-           Point(ls+24) = {"""+str(x)+","+str(y+3.92)+""",0,lc};
-           """ + _twelve
+           Point(ls+13) = {"""
+        + str(x)
+        + ","
+        + str(y)
+        + """,0,lc};
+           Point(ls+14) = {"""
+        + str(x + 0.5)
+        + ","
+        + str(y)
+        + """,0,lc};
+           Point(ls+15) = {"""
+        + str(x + 0.5)
+        + ","
+        + str(y + 3)
+        + """,0,lc};
+           Point(ls+16) = {"""
+        + str(x + 1.5)
+        + ","
+        + str(y + 1)
+        + """,0,lc};
+           Point(ls+17) = {"""
+        + str(x + 2.5)
+        + ","
+        + str(y + 3)
+        + """,0,lc};
+           Point(ls+18) = {"""
+        + str(x + 2.5)
+        + ","
+        + str(y)
+        + """,0,lc};
+           Point(ls+19) = {"""
+        + str(x + 3)
+        + ","
+        + str(y)
+        + """,0,lc};
+           Point(ls+20) = {"""
+        + str(x + 3)
+        + ","
+        + str(y + 3.92)
+        + """,0,lc};
+           Point(ls+21) = {"""
+        + str(x + 2.3)
+        + ","
+        + str(y + 3.92)
+        + """,0,lc};
+           Point(ls+22) = {"""
+        + str(x + 1.5)
+        + ","
+        + str(y + 2.32)
+        + """,0,lc};
+           Point(ls+23) = {"""
+        + str(x + 0.9)
+        + ","
+        + str(y + 3.92)
+        + """,0,lc};
+           Point(ls+24) = {"""
+        + str(x)
+        + ","
+        + str(y + 3.92)
+        + """,0,lc};
+           """
+        + _twelve
+    )
 
     _l_s += 36
     return out
 
 
-def cube_mentor(lx=1, ly=1,lz=1, origin=(0, 0, 0), h=0.1):
+def cube_mentor(lx=1, ly=1, lz=1, origin=(0, 0, 0), h=0.1):
     cube_stub = """
     Point(1) = {orig0,orig1,orig2,cl};
     Point(2) = {orig0+lx,orig1,orig2,cl};
@@ -243,20 +338,34 @@ def cube_mentor(lx=1, ly=1,lz=1, origin=(0, 0, 0), h=0.1):
     """
 
     cube_geometry = (
-        "lx = " + str(lx) + ";\n" +
-        "ly = " + str(ly) + ";\n" +
-        "lz = " + str(lz) + ";\n" +
-        "orig0 = " + str(origin[0]) + ";\n" +
-        "orig1 = " + str(origin[1]) + ";\n" +
-        "orig2 = " + str(origin[2]) + ";\n" +
-        "cl = " + str(h) + ";\n" + cube_stub)
+        "lx = "
+        + str(lx)
+        + ";\n"
+        + "ly = "
+        + str(ly)
+        + ";\n"
+        + "lz = "
+        + str(lz)
+        + ";\n"
+        + "orig0 = "
+        + str(origin[0])
+        + ";\n"
+        + "orig1 = "
+        + str(origin[1])
+        + ";\n"
+        + "orig2 = "
+        + str(origin[2])
+        + ";\n"
+        + "cl = "
+        + str(h)
+        + ";\n"
+        + cube_stub
+    )
 
     return __generate_grid_from_geo_string(cube_geometry)
 
 
-
-
-def cube_mentor_graded(lx=2, ly=2,lz=0.1, origin=(-1, -1, 0), h=0.1):
+def cube_mentor_graded(lx=2, ly=2, lz=0.1, origin=(-1, -1, 0), h=0.1):
     cube_stub = """
     Point(1) = {orig0,orig1,orig2,cl};
     Point(2) = {orig0+lx,orig1,orig2,cl};
@@ -335,13 +444,29 @@ def cube_mentor_graded(lx=2, ly=2,lz=0.1, origin=(-1, -1, 0), h=0.1):
     """
 
     cube_geometry = (
-        "lx = " + str(lx) + ";\n" +
-        "ly = " + str(ly) + ";\n" +
-        "lz = " + str(lz) + ";\n" +
-        "orig0 = " + str(origin[0]) + ";\n" +
-        "orig1 = " + str(origin[1]) + ";\n" +
-        "orig2 = " + str(origin[2]) + ";\n" +
-        "cl = " + str(h) + ";\n" + cube_stub)
+        "lx = "
+        + str(lx)
+        + ";\n"
+        + "ly = "
+        + str(ly)
+        + ";\n"
+        + "lz = "
+        + str(lz)
+        + ";\n"
+        + "orig0 = "
+        + str(origin[0])
+        + ";\n"
+        + "orig1 = "
+        + str(origin[1])
+        + ";\n"
+        + "orig2 = "
+        + str(origin[2])
+        + ";\n"
+        + "cl = "
+        + str(h)
+        + ";\n"
+        + cube_stub
+    )
 
     return __generate_grid_from_geo_string(cube_geometry)
 
@@ -998,8 +1123,7 @@ def destroyer(origin=(0, 0, 0), h=100):
       Mesh.Algorithm = 2;
     """
 
-    cube_geometry = (
-        "lc = " + str(h) + ";\n" + cube_stub)
+    cube_geometry = "lc = " + str(h) + ";\n" + cube_stub
 
     return __generate_grid_from_geo_string(cube_geometry)
 
@@ -1102,65 +1226,75 @@ def reentrant_cube_exterior(h=0.1, refinement_factor=0.3):
     Mesh.Algorithm = 6;
     """
     reentrant_cube_geometry = (
-        "h = " + str(h) + ";\n" +
-        "r = h * " + str(refinement_factor) + ";\n" + reentrant_cube_stub)
+        "h = "
+        + str(h)
+        + ";\n"
+        + "r = h * "
+        + str(refinement_factor)
+        + ";\n"
+        + reentrant_cube_stub
+    )
     return __generate_grid_from_geo_string(reentrant_cube_geometry)
 
 
 def Phix(x, n, domain_index, result):
-    angle = np.arctan2(x[1],x[0]) 
-    x1 =  (1-x[2]**2) * (np.cos(2 * angle) - 1)
+    angle = np.arctan2(x[1], x[0])
+    x1 = (1 - x[2] ** 2) * (np.cos(2 * angle) - 1)
     result[0] = x1
 
+
 def Phiy(x, n, domain_index, result):
-    angle =  np.arctan2(x[1],x[0]) 
-    y1 = 0.25 * np.sin(angle) *  (1- x[2]**2)
+    angle = np.arctan2(x[1], x[0])
+    y1 = 0.25 * np.sin(angle) * (1 - x[2] ** 2)
     result[0] = y1
-    
-    
+
+
 def perturbate(grid, t):
-    P1 = bempp.api.function_space(grid, 'B-P', 1)
-    grid_funx = bempp.api.GridFunction(P1, fun = Phix)
-    grid_funy = bempp.api.GridFunction(P1, fun = Phiy)
-    elements = grid.leaf_view.elements	
+    P1 = bempp.api.function_space(grid, "B-P", 1)
+    grid_funx = bempp.api.GridFunction(P1, fun=Phix)
+    grid_funy = bempp.api.GridFunction(P1, fun=Phiy)
+    elements = grid.leaf_view.elements
     vertices = grid.leaf_view.vertices
     normals = P1.global_dof_normals
     x, y, z = vertices
     vertices[0, :] = x + t * grid_funx.coefficients
     vertices[1, :] = y + t * grid_funy.coefficients
 
-    c = normals[0,:] * grid_funx.coefficients + normals[1,:] * grid_funy.coefficients
+    c = normals[0, :] * grid_funx.coefficients + normals[1, :] * grid_funy.coefficients
 
-    kappa = bempp.api.GridFunction(P1, coefficients = c)
+    kappa = bempp.api.GridFunction(P1, coefficients=c)
 
     return bempp.api.grid_from_element_data(vertices, elements), kappa
 
-    
+
 def change_normal(elements):
-    return np.array([elements[0,:],elements[2,:],elements[1,:]])
+    return np.array([elements[0, :], elements[2, :], elements[1, :]])
+
 
 def kite(h, t=0):
-
     def Phix(x, n, domain_index, result):
-        angle = np.arctan2(x[1],x[0]) 
-        x1 = np.cos(angle) + (0.65 +t )  * np.cos(2 * angle) - 0.65 - t
+        angle = np.arctan2(x[1], x[0])
+        x1 = np.cos(angle) + (0.65 + t) * np.cos(2 * angle) - 0.65 - t
         result[0] = x1
 
     def Phiy(x, n, domain_index, result):
-        angle =  np.arctan2(x[1],x[0]) 
-        y1 = (1.5-0.25 *t) * np.sin(angle)
+        angle = np.arctan2(x[1], x[0])
+        y1 = (1.5 - 0.25 * t) * np.sin(angle)
         result[0] = y1
+
     def perturbate(grid, funx, funy):
-        P1 = bempp.api.function_space(grid, 'P', 1)
-        grid_funx = bempp.api.GridFunction(P1, fun = funx)
-        grid_funy = bempp.api.GridFunction(P1, fun = funy)
+        P1 = bempp.api.function_space(grid, "P", 1)
+        grid_funx = bempp.api.GridFunction(P1, fun=funx)
+        grid_funy = bempp.api.GridFunction(P1, fun=funy)
         elements = grid.leaf_view.elements
         vertices = grid.leaf_view.vertices
         normals = P1.global_dof_normals
         x, y, z = vertices
-        #vertices[0, :] = (grid_funx.coefficients * (1-vertices[2,:]**2) + vertices[0,:]* (vertices[2,:]**2)) * (-1)
-        vertices[0, :] = (z**2-1) * grid_funx.coefficients - x * z**2
-        vertices[1, :] = grid_funy.coefficients * (1- vertices[2, :]**2) + vertices[1,:] * (vertices[2,:]**2)
+        # vertices[0, :] = (grid_funx.coefficients * (1-vertices[2,:]**2) + vertices[0,:]* (vertices[2,:]**2)) * (-1)
+        vertices[0, :] = (z**2 - 1) * grid_funx.coefficients - x * z**2
+        vertices[1, :] = grid_funy.coefficients * (1 - vertices[2, :] ** 2) + vertices[
+            1, :
+        ] * (vertices[2, :] ** 2)
         return bempp.api.grid_from_element_data(vertices, change_normal(elements))
 
     grid = bempp.api.shapes.sphere(h=h)

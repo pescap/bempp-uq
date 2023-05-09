@@ -1,5 +1,3 @@
-__all__ = [
-    "maxwell"
-    ]
+__all__ = ["maxwell"]
 
 from . import maxwell
