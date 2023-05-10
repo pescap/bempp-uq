@@ -102,15 +102,13 @@ def multitrace_osrc(grid, wave_number, parameters=None, target=None, MtEType="1"
 
 def assemble_operators(
     grid,
-    k_int,
-    k_ext,
-    far_field_points,
-    spaces="maxwell",
-    osrc=False,
-    Np=1,
-    MtEType="1",
+    config
 ):
     # Assemble operators for transmission problem.
+    k_ext, k_int = config['k_ext'], config['k_int']
+    osrc = config['osrc']
+    spaces = config['spaces']
+    far_field_points = config['far_field_points']
     if osrc and spaces != "maxwell_primal":
         raise NotImplementedError("Osrc only for primal formulations")
 
@@ -125,8 +123,8 @@ def assemble_operators(
     )
 
     if osrc and spaces == "maxwell_primal":
-        osrc_int = multitrace_osrc(grid, k_int, MtEType=MtEType, Np=Np)
-        osrc_ext = multitrace_osrc(grid, k_ext, MtEType=MtEType, Np=Np)
+        osrc_int = multitrace_osrc(grid, k_int)
+        osrc_ext = multitrace_osrc(grid, k_ext)
         transmission_operators = (
             multitrace_int,
             multitrace_ext,
@@ -149,10 +147,14 @@ def assemble_operators(
 
 
 def evaluate_far_field(
-    transmission_operators, eps_rel, mu_rel, k_ext, polarization, direction, osrc=False
+    transmission_operators, config
 ):
     # Solve the penetrable scattering problem and evaluate far-field.
-    barycentric = transmission_operators[0].domain_spaces[0].is_barycentric
+    eps_rel, mu_rel = config['eps_rel'], config['mu_rel']
+    k_ext = config['k_ext']
+    polarization, direction = config['polarization'], config['direction']
+    osrc = config['osrc']
+    spaces = config['spaces']
     if osrc:
         (
             multitrace_int,
@@ -179,10 +181,10 @@ def evaluate_far_field(
     lhs_op = rescaled_int_op + multitrace_ext
     rhs_op = 0.5 * identity - rescaled_int_op
 
-    if barycentric:
-        dual = lhs_op.dual_to_range_spaces
-    else:
+    if spaces == 'maxwell_primal':
         dual = lhs_op.domain_spaces
+    else:
+        dual = lhs_op.dual_to_range_spaces
     electric_incident = bempp.api.GridFunction(
         lhs_op.domain_spaces[0],
         fun=tangential_trace(k_ext, polarization, direction),
@@ -195,7 +197,7 @@ def evaluate_far_field(
     )
 
     rhs = rhs_op * [electric_incident, magnetic_incident]
-    if barycentric:
+    if spaces != 'maxwell_primal':
         solution, _ = gmres(lhs_op, rhs, use_strong_form=True)
     else:
         b = projections_of_grid_function_list(rhs, dual)
