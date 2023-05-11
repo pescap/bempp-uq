@@ -312,7 +312,6 @@ class MtEOps:
     def getMtEPrec(self, MtEType, Np, div_space, curl_space, primal=True):
         self.setMtEOperators(Np, div_space, curl_space, MtEType, primal)
         if MtEType == "1":
-            print("Type 1", MtEType)
             self.P = []
             for i in range(self.Np):
                 self.P.append(
@@ -341,7 +340,6 @@ class MtEOps:
                 )
             MtEPrec = self.MtE1Prec
         elif MtEType == "2":
-            print("Type 2")
             MtEPrec = self.MtE2Prec
         else:
             self.coef = 0

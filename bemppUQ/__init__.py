@@ -9,7 +9,8 @@ __all__ = [
     "operators",    
     "preconditioning",
     "shapes",    
-    "utils"
+    "utils",
+    "config",
     ]
 
 from . import assembly
@@ -19,5 +20,4 @@ from . import operators
 from . import preconditioning
 from . import shapes
 from . import utils
-
-
+from . import config

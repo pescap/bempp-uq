@@ -1,6 +1,4 @@
 import numpy as np
-from decimal import *
-import collections
 
 config = {}
 
@@ -45,7 +43,7 @@ config["solver"] = "direct"  # or gmres
 # options for gmres
 config["restart"] = 10000
 config["maxiter"] = 10000
-config["tolerance"] = 1e-4
+config["tolerance"] = 1e-6
 
 # options for assembly (1e-3 / hmat)
 config["spaces"] = "maxwell_primal"  # or maxwell
@@ -53,10 +51,6 @@ config["osrc"] = True
 
 # options for the Far Field at z=0
 config["number_of_angles"] = 3601
-
-# options for the precision
-config["precision"] = 10
-config["h"] = 2.0 * np.pi / (config["precision"] * config["k_int"])
 
 config["angles"] = np.pi * np.linspace(0, 2, config["number_of_angles"])
 config["far_field_points"] = np.array(
@@ -66,17 +60,3 @@ config["far_field_points"] = np.array(
         np.zeros(config["number_of_angles"]),
     ]
 )
-
-k_ext, k_int = config["k_ext"], config["k_int"]
-lambda_par, freq = config["lambda"], config["frequency"]
-polarization = config["polarization"]
-direction = config["direction"]
-
-eps_rel = config["eps_rel"]
-mu_rel = config["mu_rel"]
-print("The exterior wavenumber is: {0}".format(k_ext))
-print("The interior wavenumber is: {0}".format(k_int))
-
-print("----")
-print("The exterior wavelenght is: {0}".format(lambda_par))
-print("The exterior frequency is: {:.2E}".format(Decimal(freq)))
