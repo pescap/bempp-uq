@@ -198,6 +198,7 @@ def evaluate_far_field(
 
     rhs = rhs_op * [electric_incident, magnetic_incident]
     if spaces != 'maxwell_primal':
+        print(lhs_op, 'LHS_OP')
         solution, _ = gmres(lhs_op, rhs, use_strong_form=True)
     else:
         b = projections_of_grid_function_list(rhs, dual)
