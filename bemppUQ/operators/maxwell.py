@@ -198,8 +198,10 @@ def evaluate_far_field(
 
     rhs = rhs_op * [electric_incident, magnetic_incident]
     if spaces != 'maxwell_primal':
-        print(lhs_op, 'LHS_OP')
-        solution, _ = gmres(lhs_op, rhs, use_strong_form=True)
+        op_wf = (lhs_op * lhs_op).strong_form()
+        b = coefficients_of_grid_function_list(lhs_op * rhs)
+        x, info, res, times = gmres(op_wf, b, return_residuals=True)
+        solution = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
     else:
         b = projections_of_grid_function_list(rhs, dual)
         op_osrc_wf = op_osrc.weak_form()
@@ -209,22 +211,14 @@ def evaluate_far_field(
         )
         solution = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
 
-    far_field = 4.0 * np.pi * (-electric_far * solution[1] - magnetic_far * solution[0])
+    far_field = (-electric_far * solution[1] - magnetic_far * solution[0])
     return far_field, solution
 
 
-def evaluate_far_field_sd(
-    base_grid,
-    transmission_operators,
-    eps_rel,
-    mu_rel,
-    k_int,
-    k_ext,
-    polarization,
-    direction,
-    solution,
-    grid_fun,
-):
+def evaluate_far_field_sd(base_grid, transmission_operators, config, solution, grid_fun, solve=True):
+    eps_rel, mu_rel = config['eps_rel'], config['mu_rel']
+    k_int, k_ext = config['k_int'], config['k_ext']
+    polarization, direction = config['polarization'], config['direction']
 
     electric_space, magnetic_space = transmission_operators[0].domain_spaces
     electric_dual, magnetic_dual = transmission_operators[0].dual_to_range_spaces
@@ -356,6 +350,12 @@ def evaluate_far_field_sd(
     rhs_minus[0] *= 1.0 / np.sqrt(eps_rel)
     rhs_minus[1] *= 1.0 / np.sqrt(mu_rel)
     rhs = [rhs_plus[0] + rhs_minus[0], rhs_plus[1] + rhs_minus[1]]
-    sol_p, _ = bempp.api.linalg.gmres(lhs_op, rhs, use_strong_form=True)
-    far_field_p = 4.0 * np.pi * (-electric_far * sol_p[1] - magnetic_far * sol_p[0])
-    return far_field_p
+    if solve == True:
+        op_wf = (lhs_op * lhs_op).strong_form()
+        b = coefficients_of_grid_function_list(lhs_op * rhs)
+        x, info, res, times = gmres(op_wf, b, return_residuals=True)
+        sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
+        far_field_p = (-electric_far * sol_p[1] - magnetic_far * sol_p[0])
+        return far_field_p, sol_p
+    else:
+        return lhs_op, rhs
