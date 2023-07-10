@@ -3,7 +3,8 @@ import time
 import bempp.api
 import numpy as np
 import scipy.sparse.linalg
-from bempp.api.assembly import BoundaryOperator, GridFunction
+from bempp.api.assembly.boundary_operator import BoundaryOperator
+from bempp.api.assembly.grid_function import GridFunction
 
 
 def tensorize(x1, x2=None):

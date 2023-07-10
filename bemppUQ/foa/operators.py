@@ -5,10 +5,12 @@ import numpy as np
 def surface_gradient(
     domain, range_, dual_to_range, label="SURFACE_GRADIENT", parameters=None
 ):
+    from bempp.api.assembly.functors import (
+        scalar_function_value_functor,
+        simple_test_trial_integrand_functor,
+        surface_divergence_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import surface_divergence_functor
-    from bempp.api.assembly.functors import scalar_function_value_functor
 
     return -operator_from_functors(
         domain,
@@ -25,11 +27,12 @@ def surface_gradient(
 def surface_divergence(
     domain, range_, dual_to_range, label="SURFACE_DIVERGENCE", parameters=None
 ):
+    from bempp.api.assembly.functors import (
+        hdiv_function_value_functor,
+        simple_test_trial_integrand_functor,
+        surface_gradient_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import hdiv_function_value_functor
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import maxwell_test_trial_integrand_functor
-    from bempp.api.assembly.functors import surface_gradient_functor
 
     return -operator_from_functors(
         domain,

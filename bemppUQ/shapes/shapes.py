@@ -53,7 +53,7 @@ def __generate_grid_from_geo_string(geo_string):
         cmd = gmsh_command + " -2 " + geo_name
         try:
             subprocess.check_call(cmd, shell=True, stdout=fnull, stderr=fnull)
-        except:
+        except SystemExit:
             print("The following command failed: " + cmd)
             fnull.close()
             raise
@@ -117,8 +117,10 @@ _twelve = """Line(ls+1) = {ls+1,ls+2};
            Line(ls+36) = {ls+12,ls+24};
 
 
-           Line Loop(ls+1) = {ls+1,ls+2,ls+3,ls+4,ls+5,ls+6,ls+7,ls+8,ls+9,ls+10,ls+11,ls+12};
-           Line Loop(ls+2) = {-ls-24,-ls-23,-ls-22,-ls-21,-ls-20,-ls-19,-ls-18,-ls-17,-ls-16,-ls-15,-ls-14,-ls-13};
+           Line Loop(ls+1) = {ls+1,ls+2,ls+3,ls+4,ls+5\
+           ,ls+6,ls+7,ls+8,ls+9,ls+10,ls+11,ls+12};
+           Line Loop(ls+2) = {-ls-24,-ls-23,-ls-22,-ls-21\
+           ,-ls-20,-ls-19,-ls-18,-ls-17,-ls-16,-ls-15,-ls-14,-ls-13};
 
            Line Loop(ls+3) = {-ls-1,ls+25,ls+13,-ls-26};
            Line Loop(ls+4) = {-ls-2,ls+26,ls+14,-ls-27};
@@ -418,8 +420,6 @@ def cube_mentor_graded(lx=2, ly=2, lz=0.1, origin=(-1, -1, 0), h=0.1):
 
     Field[2] = Attractor;
     Field[2].NodesList = {1,2,3,4,5,6,7,8};
-    
-
     Field[3] = Threshold;
     Field[3].IField = 1;
     Field[3].LcMin = cl / 5;
@@ -1152,11 +1152,9 @@ def reentrant_cube_exterior(h=0.1, refinement_factor=0.3):
     Line(4) = {13, 11};
     Line(5) = {11, 10};
     Line(6) = {10, 1};
-
     Line(7) = {2, 3};
     Line(8) = {3, 7};
     Line(9) = {7, 6};
-    
     Line(10) = {3, 4};
     Line(11) = {4, 8};
     Line(12) = {8, 7};
@@ -1271,7 +1269,7 @@ def change_normal(elements):
     return np.array([elements[0, :], elements[2, :], elements[1, :]])
 
 
-def kite(h, t=0):
+def kite(h=0.5, t=0):
     def Phix(x, n, domain_index, result):
         angle = np.arctan2(x[1], x[0])
         x1 = np.cos(angle) + (0.65 + t) * np.cos(2 * angle) - 0.65 - t
@@ -1288,9 +1286,7 @@ def kite(h, t=0):
         grid_funy = bempp.api.GridFunction(P1, fun=funy)
         elements = grid.leaf_view.elements
         vertices = grid.leaf_view.vertices
-        normals = P1.global_dof_normals
         x, y, z = vertices
-        # vertices[0, :] = (grid_funx.coefficients * (1-vertices[2,:]**2) + vertices[0,:]* (vertices[2,:]**2)) * (-1)
         vertices[0, :] = (z**2 - 1) * grid_funx.coefficients - x * z**2
         vertices[1, :] = grid_funy.coefficients * (1 - vertices[2, :] ** 2) + vertices[
             1, :

@@ -1,4 +1,3 @@
-import scipy
 from scipy.sparse.linalg import LinearOperator
 
 
