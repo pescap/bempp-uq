@@ -1,19 +1,15 @@
-import bempp.api
-from bempp.api.linalg import lu
 import cmath
+import itertools
+import time
+
+import bempp.api
+import numpy as np
 import scipy as sp
-from itertools import chain
-from scipy.linalg import solve, lu_solve
-from scipy.linalg import lu_factor
-from scipy.linalg import lu as slu
-from bempp.api import GridFunction, as_matrix
+from bempp.api import as_matrix
 from bempp.api.assembly.boundary_operator import BoundaryOperator
 from bempp.api.assembly.discrete_boundary_operator import (
     InverseSparseDiscreteBoundaryOperator,
 )
-import itertools
-import numpy as np
-import time
 
 
 def timerfunc(func):
@@ -122,9 +118,11 @@ def InversePade(Np, x, angle):
 
 
 def scalar_prod(domain, range_, dual_to_range, label="SCALAR_PRODUCT", parameters=None):
+    from bempp.api.assembly.functors import (
+        scalar_function_value_functor,
+        simple_test_trial_integrand_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import scalar_function_value_functor
 
     return operator_from_functors(
         domain,
@@ -141,10 +139,12 @@ def scalar_prod(domain, range_, dual_to_range, label="SCALAR_PRODUCT", parameter
 def surface_gradient(
     domain, range_, dual_to_range, label="SURFACE_GRADIENT", parameters=None
 ):
+    from bempp.api.assembly.functors import (
+        hcurl_function_value_functor,
+        simple_test_trial_integrand_functor,
+        surface_gradient_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import surface_gradient_functor
-    from bempp.api.assembly.functors import hcurl_function_value_functor
 
     return operator_from_functors(
         domain,
@@ -161,11 +161,11 @@ def surface_gradient(
 def simple_vector_prod_curl(
     domain, range_, dual_to_range, label="CURL_DP", parameters=None
 ):
+    from bempp.api.assembly.functors import (
+        hcurl_function_value_functor,
+        simple_test_trial_integrand_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import hdiv_function_value_functor
-    from bempp.api.assembly.functors import hcurl_function_value_functor
-    from bempp.api.assembly.functors import maxwell_test_trial_integrand_functor
 
     return operator_from_functors(
         domain,
@@ -180,9 +180,11 @@ def simple_vector_prod_curl(
 
 
 def surface_curl(domain, range_, dual_to_range, label="SURFACE_CURL", parameters=None):
+    from bempp.api.assembly.functors import (
+        scalar_surface_curl_functor,
+        simple_test_trial_integrand_functor,
+    )
     from bempp.api.operators.boundary.sparse import operator_from_functors
-    from bempp.api.assembly.functors import simple_test_trial_integrand_functor
-    from bempp.api.assembly.functors import scalar_surface_curl_functor
 
     return operator_from_functors(
         domain,
@@ -210,27 +212,6 @@ def appPadeCoefficients(Np, Ric, DRic, kappa, rho, n):
     coef1 = s1 * Ric
     coef2 = s2 * DRic
     return [coef1, coef2]
-
-
-def getAppFieldVectors(theta, phi, Leg, DLeg, Ric, DRic, kappa, rho, n):
-    kappa_eps = kappa + 1.0j * 0.39 * kappa ** (1.0 / 3) * 1.0 ** (-1.0 / 3)
-    coef0 = (-1j) ** (n + 1) * (2.0 * n + 1.0) / (n * (n + 1.0))
-    [M1, N1] = getVectors(rho, theta, phi, Leg, DLeg)
-    [coef1, coef2] = appCoefficients(Ric, DRic, kappa_eps, rho, n)
-    M = M1 * coef1
-    N = N1 * coef2
-    return coef0 * (N + 1j * M) * (1.0 / kappa)
-
-
-def getPadeFieldVectors(theta, phi, Leg, DLeg, Ric, DRic, kappa, rho, n):
-    kappa_eps = kappa + 1.0j * 0.39 * kappa ** (1.0 / 3) * 1.0 ** (-1.0 / 3)
-    coef0 = (-1j) ** (n + 1) * (2.0 * n + 1.0) / (n * (n + 1.0))
-    Np = 2
-    [M1, N1] = getVectors(rho, theta, phi, Leg, DLeg)
-    [coef1, coef2] = appPadeCoefficients(Np, Ric, DRic, kappa_eps, rho, n)
-    M = M1 * coef1
-    N = N1 * coef2
-    return coef0 * (N + 1j * M) * (1.0 / kappa)
 
 
 class MtEOps:
@@ -263,7 +244,6 @@ class MtEOps:
             self.curl_space[0], self.curl_space[0], self.curl_space[0]
         )
         if MtEType == "1":
-
             self.K = (self.kappa_eps**2) * scalar_prod(
                 self.p1_space, self.p1_space, self.p1_space
             )
@@ -305,7 +285,6 @@ class MtEOps:
         return self.applyLambda2(v)
 
     def MtE2Prec3(self, v):
-        res = self.R_0 * v + self.G1 * v * self.coef
         return self.applyLambda2(v)
 
     @timerfunc

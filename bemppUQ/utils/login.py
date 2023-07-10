@@ -1,17 +1,19 @@
+import time
+
 import bempp.api
 import numpy as np
 import scipy.sparse.linalg
-from bempp.api.assembly import GridFunction
-from bempp.api.assembly import BoundaryOperator
+from bempp.api.assembly import BoundaryOperator, GridFunction
 
 
 def tensorize(x1, x2=None):
     if x2 is None:
         x2 = x1
-    
+
     x1 = np.array([x1])
     x2 = np.array([x2])
     return np.dot(x1.T, x2.conj())
+
 
 def rescale(A, d1, d2):
     # Rescale the 2x2 block operator matsrix A
@@ -26,7 +28,8 @@ def rescale(A, d1, d2):
 
 
 def get_h(grid):
-    # routine that gives the exact value of h defined as the maximum length of the triangles
+    # routine that gives the exact value of h
+    # defined as the maximum length of the triangles
     # of a given mesh
     elements1 = list(grid.leaf_view.entity_iterator(1))
     vol = []
@@ -38,8 +41,8 @@ def get_h(grid):
 
 def relative_error(self, fun, element=None):
     """Compute the relative L^2 error compared to a given analytic function."""
-    from bempp.api.integration import gauss_triangle_points_and_weights
     import numpy as np
+    from bempp.api.integration import gauss_triangle_points_and_weights
 
     p_normal = np.array([[0]])
     global_diff = 0
@@ -64,9 +67,6 @@ def relative_error(self, fun, element=None):
         abs_fun_squared = np.sum(np.abs(fun_vals) ** 2, axis=0)
         fun_l2_norm += np.sum(abs_fun_squared * integration_elements * weights)
     return np.sqrt(global_diff / fun_l2_norm)
-
-
-import time
 
 
 class _it_counter(object):
@@ -122,10 +122,7 @@ def gmres(
     correct space.
 
     """
-    import bempp.api
-    import time
-
-    if not isinstance(A, BoundaryOperator) and use_strong_form == True:
+    if not isinstance(A, BoundaryOperator) and use_strong_form:
         raise ValueError("Strong form only with BoundaryOperator")
     if isinstance(A, BoundaryOperator) and not isinstance(b, GridFunction):
         raise ValueError("Instance Error")
@@ -134,10 +131,6 @@ def gmres(
 
     if isinstance(A, BoundaryOperator) and isinstance(b, GridFunction):
         if use_strong_form:
-            if not A.range.is_compatible(b.space):
-                raise ValueError(
-                    "The range of A and the space of A must have the same number of unknowns if the strong form is used."
-                )
             A_op = A.strong_form()
             b_vec = b.coefficients
         else:
@@ -149,11 +142,9 @@ def gmres(
 
     callback = _it_counter(return_residuals)
 
-    start_time = time.time()
     x, info = scipy.sparse.linalg.gmres(
         A_op, b_vec, tol=tol, restart=restart, maxiter=maxiter, callback=callback
     )
-    end_time = time.time()
 
     if isinstance(A, BoundaryOperator) and isinstance(b, GridFunction):
         res_fun = GridFunction(A.domain, coefficients=x.ravel())

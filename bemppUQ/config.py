@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def set_case(case='B'):
+def set_case(case="B"):
     config = {}
 
     # physical constants
@@ -11,16 +11,15 @@ def set_case(case='B'):
 
     # parameters
     # MIE
-    if case == 'A':
+    if case == "A":
         config["k_ext"] = 3.0
         config["eps_rel"] = 2.1
         config["mu_rel"] = 1.0
-    
-    elif case == 'B':
+
+    elif case == "B":
         config["k_ext"] = 5.0
         config["eps_rel"] = 1.9
         config["mu_rel"] = 1.0
-    
 
     # Teflon
     # config['k_ext'] = 1.047197551196598
@@ -36,13 +35,12 @@ def set_case(case='B'):
     # config['eps_rel'] = 2.5
     # config['mu_rel'] = 1.6
 
-
-    if case == 'A':
+    if case == "A":
         config["polarization"] = np.array([1.0 + 1j, 2.0, -1.0 - 1.0 / 3.0 * 1j])
         config["direction"] = np.array(
-    [1.0 / np.sqrt(14), 2.0 / np.sqrt(14), 3.0 / np.sqrt(14)], dtype="float64"
-    )
-    elif case == 'B':
+            [1.0 / np.sqrt(14), 2.0 / np.sqrt(14), 3.0 / np.sqrt(14)], dtype="float64"
+        )
+    elif case == "B":
         # for incident_z
         config["polarization"] = np.array([0.0, 0.0, 1.0])
         config["direction"] = np.array([1.0, 0.0, 0.0], dtype="float64")
@@ -50,27 +48,27 @@ def set_case(case='B'):
     # HPs
 
     # options for gmres
-    if case == 'A':
+    if case == "A":
         config["restart"] = 10000
         config["maxiter"] = 10000
         config["tolerance"] = 1e-8
 
-    elif case == 'B':
+    elif case == "B":
         config["restart"] = 10000
         config["maxiter"] = 10000
         config["tolerance"] = 1e-6
-        
-            # options for assembly (1e-3 / hmat)
-    if case == 'A':
+
+        # options for assembly (1e-3 / hmat)
+    if case == "A":
         config["spaces"] = "maxwell"  # or maxwell
         config["osrc"] = False
-    elif case == 'B':
+    elif case == "B":
         config["spaces"] = "maxwell_primal"  # or maxwell
         config["osrc"] = True
     # options for the Far Field at z=0
-    if case == 'A':
+    if case == "A":
         config["number_of_angles"] = 400
-    elif case == 'B':
+    elif case == "B":
         config["number_of_angles"] = 3601
 
     config["angles"] = np.pi * np.linspace(0, 2, config["number_of_angles"])
@@ -83,5 +81,6 @@ def set_case(case='B'):
     )
 
     return config
+
 
 config = set_case()
