@@ -2,9 +2,9 @@ import bempp.api
 import numpy as np
 from bempp.api.assembly.blocked_operator import (
     BlockedOperator,
-    coefficients_from_grid_functions_list,
+    coefficients_of_grid_function_list,
     grid_function_list_from_coefficients,
-    projections_from_grid_functions_list,
+    projections_of_grid_function_list,
 )
 from bempp.api.operators.boundary.maxwell import electric_field, magnetic_field
 from bempp.api.operators.boundary.sparse import identity
@@ -186,11 +186,11 @@ def evaluate_far_field(transmission_operators, config):
     rhs = rhs_op * [electric_incident, magnetic_incident]
     if spaces != "maxwell_primal":
         op_wf = (lhs_op * lhs_op).strong_form()
-        b = coefficients_from_grid_functions_list(lhs_op * rhs)
+        b = coefficients_of_grid_function_list(lhs_op * rhs)
         x, info, res, times = gmres(op_wf, b, return_residuals=True)
         solution = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
     else:
-        b = projections_from_grid_functions_list(rhs, dual)
+        b = projections_of_grid_function_list(rhs, dual)
         op_osrc_wf = op_osrc.weak_form()
         op_wf = lhs_op.weak_form()
         x, info, res, times = gmres(
@@ -341,7 +341,7 @@ def evaluate_far_field_sd(
     rhs = [rhs_plus[0] + rhs_minus[0], rhs_plus[1] + rhs_minus[1]]
     if solve:
         op_wf = (lhs_op * lhs_op).strong_form()
-        b = coefficients_from_grid_functions_list(lhs_op * rhs)
+        b = coefficients_of_grid_function_list(lhs_op * rhs)
         x, info, res, times = gmres(op_wf, b, return_residuals=True)
         sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
         far_field_p = -electric_far * sol_p[1] - magnetic_far * sol_p[0]
