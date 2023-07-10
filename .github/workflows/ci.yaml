@@ -16,7 +16,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Install package  
-        run: pip install -e .
+        run: |
+            cd bemppUQ
+            pip install -e .
       - name: Python Black Check
         uses: rodrigogiraoserrao/python-black-check@v2.0
         with:
