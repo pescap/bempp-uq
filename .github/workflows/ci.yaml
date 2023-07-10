@@ -13,12 +13,10 @@ jobs:
         uses: actions/checkout@v3
       - name: Install dependencies
         run: |
-          cd bemppUQ
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Install package  
         run: |
-            cd bemppUQ
             pip install -e .
       - name: Python Black Check
         uses: rodrigogiraoserrao/python-black-check@v2.0
