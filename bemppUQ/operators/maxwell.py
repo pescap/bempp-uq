@@ -1,15 +1,15 @@
 import bempp.api
 import numpy as np
-
-from bempp.api.assembly import BlockedOperator
-from bempp.api.space import project_operator
+from bempp.api.assembly.blocked_operator import (
+    BlockedOperator,
+    coefficients_of_grid_function_list,
+    grid_function_list_from_coefficients,
+    projections_of_grid_function_list,
+)
 from bempp.api.operators.boundary.maxwell import electric_field, magnetic_field
 from bempp.api.operators.boundary.sparse import identity
-from bempp.api.assembly.blocked_operator import (
-    coefficients_of_grid_function_list,
-    projections_of_grid_function_list,
-    grid_function_list_from_coefficients,
-)
+
+from bemppUQ.preconditioning.osrc import osrc_MtE
 
 from ..foa.operators import (
     function_product,
@@ -17,8 +17,8 @@ from ..foa.operators import (
     surface_gradient,
     trace_transformation,
 )
-from ..functions import tangential_trace, neumann_trace
-from ..utils.login import rescale, gmres
+from ..functions import neumann_trace, tangential_trace
+from ..utils.login import gmres, rescale
 
 
 def multitrace_operator(
@@ -81,18 +81,10 @@ def multitrace_identity(grid, parameters=None, spaces="maxwell_primal"):
     return blocked_operator
 
 
-import bemppUQ
-from bemppUQ.preconditioning.osrc import osrc_MtE
-
-
 def multitrace_osrc(grid, wave_number, parameters=None, target=None, MtEType="1", Np=1):
     """Assemble the multitrace osrc operator for Maxwell."""
 
     blocked_operator = BlockedOperator(2, 2)
-
-    rwg_space = bempp.api.function_space(grid, "RWG", 0)
-    snc_space = bempp.api.function_space(grid, "SNC", 0)
-
     osrc = osrc_MtE(grid, wave_number, MtEType=MtEType, Np=Np)
 
     blocked_operator[0, 1] = osrc
@@ -100,15 +92,12 @@ def multitrace_osrc(grid, wave_number, parameters=None, target=None, MtEType="1"
     return blocked_operator
 
 
-def assemble_operators(
-    grid,
-    config
-):
+def assemble_operators(grid, config):
     # Assemble operators for transmission problem.
-    k_ext, k_int = config['k_ext'], config['k_int']
-    osrc = config['osrc']
-    spaces = config['spaces']
-    far_field_points = config['far_field_points']
+    k_ext, k_int = config["k_ext"], config["k_int"]
+    osrc = config["osrc"]
+    spaces = config["spaces"]
+    far_field_points = config["far_field_points"]
     if osrc and spaces != "maxwell_primal":
         raise NotImplementedError("Osrc only for primal formulations")
 
@@ -146,15 +135,13 @@ def assemble_operators(
     return transmission_operators
 
 
-def evaluate_far_field(
-    transmission_operators, config
-):
+def evaluate_far_field(transmission_operators, config):
     # Solve the penetrable scattering problem and evaluate far-field.
-    eps_rel, mu_rel = config['eps_rel'], config['mu_rel']
-    k_ext = config['k_ext']
-    polarization, direction = config['polarization'], config['direction']
-    osrc = config['osrc']
-    spaces = config['spaces']
+    eps_rel, mu_rel = config["eps_rel"], config["mu_rel"]
+    k_ext = config["k_ext"]
+    polarization, direction = config["polarization"], config["direction"]
+    osrc = config["osrc"]
+    spaces = config["spaces"]
     if osrc:
         (
             multitrace_int,
@@ -181,7 +168,7 @@ def evaluate_far_field(
     lhs_op = rescaled_int_op + multitrace_ext
     rhs_op = 0.5 * identity - rescaled_int_op
 
-    if spaces == 'maxwell_primal':
+    if spaces == "maxwell_primal":
         dual = lhs_op.domain_spaces
     else:
         dual = lhs_op.dual_to_range_spaces
@@ -197,7 +184,7 @@ def evaluate_far_field(
     )
 
     rhs = rhs_op * [electric_incident, magnetic_incident]
-    if spaces != 'maxwell_primal':
+    if spaces != "maxwell_primal":
         op_wf = (lhs_op * lhs_op).strong_form()
         b = coefficients_of_grid_function_list(lhs_op * rhs)
         x, info, res, times = gmres(op_wf, b, return_residuals=True)
@@ -211,14 +198,16 @@ def evaluate_far_field(
         )
         solution = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
 
-    far_field = (-electric_far * solution[1] - magnetic_far * solution[0])
+    far_field = -electric_far * solution[1] - magnetic_far * solution[0]
     return far_field, solution
 
 
-def evaluate_far_field_sd(base_grid, transmission_operators, config, solution, grid_fun, solve=True):
-    eps_rel, mu_rel = config['eps_rel'], config['mu_rel']
-    k_int, k_ext = config['k_int'], config['k_ext']
-    polarization, direction = config['polarization'], config['direction']
+def evaluate_far_field_sd(
+    base_grid, transmission_operators, config, solution, grid_fun, solve=True
+):
+    eps_rel, mu_rel = config["eps_rel"], config["mu_rel"]
+    k_int, k_ext = config["k_int"], config["k_ext"]
+    polarization, direction = config["polarization"], config["direction"]
 
     electric_space, magnetic_space = transmission_operators[0].domain_spaces
     electric_dual, magnetic_dual = transmission_operators[0].dual_to_range_spaces
@@ -350,12 +339,12 @@ def evaluate_far_field_sd(base_grid, transmission_operators, config, solution, g
     rhs_minus[0] *= 1.0 / np.sqrt(eps_rel)
     rhs_minus[1] *= 1.0 / np.sqrt(mu_rel)
     rhs = [rhs_plus[0] + rhs_minus[0], rhs_plus[1] + rhs_minus[1]]
-    if solve == True:
+    if solve:
         op_wf = (lhs_op * lhs_op).strong_form()
         b = coefficients_of_grid_function_list(lhs_op * rhs)
         x, info, res, times = gmres(op_wf, b, return_residuals=True)
         sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
-        far_field_p = (-electric_far * sol_p[1] - magnetic_far * sol_p[0])
+        far_field_p = -electric_far * sol_p[1] - magnetic_far * sol_p[0]
         return far_field_p, sol_p
     else:
         return lhs_op, rhs
