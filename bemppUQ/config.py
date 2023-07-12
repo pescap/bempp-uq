@@ -58,7 +58,6 @@ def set_case(case="B"):
         config["maxiter"] = 10000
         config["tolerance"] = 1e-6
 
-        # options for assembly (1e-3 / hmat)
     if case == "A":
         config["spaces"] = "maxwell"  # or maxwell
         config["osrc"] = False
