@@ -11,7 +11,7 @@ def set_case(case="B"):
 
     # parameters
     # MIE
-    if case == "A":
+    if case == "A" or case == "MC":
         config["k_ext"] = 3.0
         config["eps_rel"] = 2.1
         config["mu_rel"] = 1.0
@@ -35,7 +35,7 @@ def set_case(case="B"):
     # config['eps_rel'] = 2.5
     # config['mu_rel'] = 1.6
 
-    if case == "A":
+    if case == "A" or case == "MC":
         config["polarization"] = np.array([1.0 + 1j, 2.0, -1.0 - 1.0 / 3.0 * 1j])
         config["direction"] = np.array(
             [1.0 / np.sqrt(14), 2.0 / np.sqrt(14), 3.0 / np.sqrt(14)], dtype="float64"
@@ -53,19 +53,20 @@ def set_case(case="B"):
         config["maxiter"] = 10000
         config["tolerance"] = 1e-8
 
-    elif case == "B":
+    elif case == "B" or case == "MC":
         config["restart"] = 10000
         config["maxiter"] = 10000
         config["tolerance"] = 1e-6
 
+        # options for assembly (1e-3 / hmat)
     if case == "A":
         config["spaces"] = "maxwell"  # or maxwell
         config["osrc"] = False
-    elif case == "B":
+    elif case == "B" or case == "MC":
         config["spaces"] = "maxwell_primal"  # or maxwell
         config["osrc"] = True
     # options for the Far Field at z=0
-    if case == "A":
+    if case == "A" or case == "MC":
         config["number_of_angles"] = 400
     elif case == "B":
         config["number_of_angles"] = 3601

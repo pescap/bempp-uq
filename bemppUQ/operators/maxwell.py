@@ -203,11 +203,24 @@ def evaluate_far_field(transmission_operators, config):
 
 
 def evaluate_far_field_sd(
-    base_grid, transmission_operators, config, solution, grid_fun, solve=True
+    base_grid, transmission_operators, config, solution, grid_funs, solve=True
 ):
+    result = []
     eps_rel, mu_rel = config["eps_rel"], config["mu_rel"]
     k_int, k_ext = config["k_int"], config["k_ext"]
     polarization, direction = config["polarization"], config["direction"]
+
+    (
+        multitrace_int,
+        multitrace_ext,
+        identity,
+        electric_far,
+        magnetic_far,
+    ) = transmission_operators
+    rescaled_int_op = rescale(multitrace_int, np.sqrt(eps_rel), np.sqrt(mu_rel))
+
+    lhs_op = rescaled_int_op + multitrace_ext
+    rhs_op = 0.5 * identity - rescaled_int_op
 
     electric_space, magnetic_space = transmission_operators[0].domain_spaces
     electric_dual, magnetic_dual = transmission_operators[0].dual_to_range_spaces
@@ -277,74 +290,80 @@ def evaluate_far_field_sd(
     gradient_operator_magnetic = surface_gradient(
         scalar_space, magnetic_space, magnetic_space
     )
+    if not isinstance(grid_funs, list):
+        grid_funs = [grid_funs]
+    i = 0
+    for grid_fun in grid_funs:
+        print(i)
+        perturb_tangential_electric_ext = function_product(
+            grid_fun, tangential_trace_electric_ext, magnetic_space, magnetic_dual
+        )
+        perturb_tangential_electric_int = function_product(
+            grid_fun, tangential_trace_electric_int, magnetic_space, magnetic_dual
+        )
+        perturb_tangential_magnetic_ext = function_product(
+            grid_fun, tangential_trace_magnetic_ext, electric_space, electric_dual
+        )
+        perturb_tangential_magnetic_int = function_product(
+            grid_fun, tangential_trace_magnetic_int, electric_space, electric_dual
+        )
 
-    perturb_tangential_electric_ext = function_product(
-        grid_fun, tangential_trace_electric_ext, magnetic_space, magnetic_dual
-    )
-    perturb_tangential_electric_int = function_product(
-        grid_fun, tangential_trace_electric_int, magnetic_space, magnetic_dual
-    )
-    perturb_tangential_magnetic_ext = function_product(
-        grid_fun, tangential_trace_magnetic_ext, electric_space, electric_dual
-    )
-    perturb_tangential_magnetic_int = function_product(
-        grid_fun, tangential_trace_magnetic_int, electric_space, electric_dual
-    )
+        perturb_enu_ext = function_product(
+            grid_fun, e_nu_ext, scalar_space, scalar_space
+        )
+        perturb_hnu_ext = function_product(
+            grid_fun, h_nu_ext, scalar_space, scalar_space
+        )
+        perturb_enu_int = function_product(
+            grid_fun, e_nu_int, scalar_space, scalar_space
+        )
+        perturb_hnu_int = function_product(
+            grid_fun, h_nu_int, scalar_space, scalar_space
+        )
 
-    perturb_enu_ext = function_product(grid_fun, e_nu_ext, scalar_space, scalar_space)
-    perturb_hnu_ext = function_product(grid_fun, h_nu_ext, scalar_space, scalar_space)
-    perturb_enu_int = function_product(grid_fun, e_nu_int, scalar_space, scalar_space)
-    perturb_hnu_int = function_product(grid_fun, h_nu_int, scalar_space, scalar_space)
+        trace_grad_perturb_enu_ext = (
+            trace_transformation_electric * gradient_operator_electric * perturb_enu_ext
+        )
+        trace_grad_perturb_enu_int = (
+            trace_transformation_electric * gradient_operator_electric * perturb_enu_int
+        )
+        trace_grad_perturb_hnu_ext = (
+            trace_transformation_magnetic * gradient_operator_magnetic * perturb_hnu_ext
+        )
+        trace_grad_perturb_hnu_int = (
+            trace_transformation_magnetic * gradient_operator_magnetic * perturb_hnu_int
+        )
 
-    trace_grad_perturb_enu_ext = (
-        trace_transformation_electric * gradient_operator_electric * perturb_enu_ext
-    )
-    trace_grad_perturb_enu_int = (
-        trace_transformation_electric * gradient_operator_electric * perturb_enu_int
-    )
-    trace_grad_perturb_hnu_ext = (
-        trace_transformation_magnetic * gradient_operator_magnetic * perturb_hnu_ext
-    )
-    trace_grad_perturb_hnu_int = (
-        trace_transformation_magnetic * gradient_operator_magnetic * perturb_hnu_int
-    )
+        f_one_plus = (
+            trace_grad_perturb_enu_ext - 1j * k_ext * perturb_tangential_magnetic_ext
+        )
+        f_two_plus = (
+            trace_grad_perturb_hnu_ext + 1j * k_ext * perturb_tangential_electric_ext
+        )
 
-    f_one_plus = (
-        trace_grad_perturb_enu_ext - 1j * k_ext * perturb_tangential_magnetic_ext
-    )
-    f_two_plus = (
-        trace_grad_perturb_hnu_ext + 1j * k_ext * perturb_tangential_electric_ext
-    )
+        f_one_minus = (
+            trace_grad_perturb_enu_int - 1j * k_int * perturb_tangential_magnetic_int
+        )
+        f_two_minus = (
+            trace_grad_perturb_hnu_int + 1j * k_int * perturb_tangential_electric_int
+        )
 
-    f_one_minus = (
-        trace_grad_perturb_enu_int - 1j * k_int * perturb_tangential_magnetic_int
-    )
-    f_two_minus = (
-        trace_grad_perturb_hnu_int + 1j * k_int * perturb_tangential_electric_int
-    )
-
-    (
-        multitrace_int,
-        multitrace_ext,
-        identity,
-        electric_far,
-        magnetic_far,
-    ) = transmission_operators
-    rescaled_int_op = rescale(multitrace_int, np.sqrt(eps_rel), np.sqrt(mu_rel))
-
-    lhs_op = rescaled_int_op + multitrace_ext
-    rhs_op = 0.5 * identity - rescaled_int_op
-    rhs_plus = rhs_op * [f_one_plus, f_two_plus]
-    rhs_minus = (multitrace_int - 0.5 * identity) * [f_one_minus, f_two_minus]
-    rhs_minus[0] *= 1.0 / np.sqrt(eps_rel)
-    rhs_minus[1] *= 1.0 / np.sqrt(mu_rel)
-    rhs = [rhs_plus[0] + rhs_minus[0], rhs_plus[1] + rhs_minus[1]]
+        rhs_plus = rhs_op * [f_one_plus, f_two_plus]
+        rhs_minus = (multitrace_int - 0.5 * identity) * [f_one_minus, f_two_minus]
+        rhs_minus[0] *= 1.0 / np.sqrt(eps_rel)
+        rhs_minus[1] *= 1.0 / np.sqrt(mu_rel)
+        rhs = [rhs_plus[0] + rhs_minus[0], rhs_plus[1] + rhs_minus[1]]
+        if solve:
+            op_wf = (lhs_op * lhs_op).strong_form()
+            b = coefficients_of_grid_function_list(lhs_op * rhs)
+            x, info, res, times = gmres(op_wf, b, return_residuals=True)
+            sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
+            far_field_p = -electric_far * sol_p[1] - magnetic_far * sol_p[0]
+            result.append(far_field_p)
+        else:
+            result.append(rhs)
+        i += 1
     if solve:
-        op_wf = (lhs_op * lhs_op).strong_form()
-        b = coefficients_of_grid_function_list(lhs_op * rhs)
-        x, info, res, times = gmres(op_wf, b, return_residuals=True)
-        sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
-        far_field_p = -electric_far * sol_p[1] - magnetic_far * sol_p[0]
-        return far_field_p, sol_p
+        return result
     else:
-        return lhs_op, rhs
+        return result, lhs_op
