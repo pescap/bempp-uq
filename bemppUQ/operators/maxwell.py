@@ -203,7 +203,13 @@ def evaluate_far_field(transmission_operators, config):
 
 
 def evaluate_far_field_sd(
-    base_grid, transmission_operators, config, solution, grid_funs, solve=True
+    base_grid,
+    transmission_operators,
+    config,
+    solution,
+    grid_funs,
+    solve=True,
+    density=False,
 ):
     result = []
     eps_rel, mu_rel = config["eps_rel"], config["mu_rel"]
@@ -359,7 +365,10 @@ def evaluate_far_field_sd(
             x, info, res, times = gmres(op_wf, b, return_residuals=True)
             sol_p = grid_function_list_from_coefficients(x, lhs_op.domain_spaces)
             far_field_p = -electric_far * sol_p[1] - magnetic_far * sol_p[0]
-            result.append(far_field_p)
+            if density:
+                result.append([sol_p, far_field_p])
+            else:
+                result.append(far_field_p)
         else:
             result.append(rhs)
         i += 1
