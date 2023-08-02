@@ -127,7 +127,7 @@ set_random_seed(seed)
 
 config = bemppUQ.config.set_case("MC")
 
-precision = 10
+precision = 30
 
 h = 2.0 * np.pi / (precision * config["k_int"])
 
@@ -142,7 +142,7 @@ transmission_operators_t = assemble_operators(gridt, config)
 
 Ut, _ = evaluate_far_field(transmission_operators_t, config)
 
-np.savetxt("results/out" + str(seed) + ".txt", Ut.view(float))
+np.savetxt("results1/out" + str(seed) + ".txt", Ut.view(float))
 
 t0 = time.time() - t0
 print("Execution time: ", t0)

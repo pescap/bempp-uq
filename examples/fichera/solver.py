@@ -12,7 +12,8 @@ from bemppUQ.operators.maxwell import (
 )
 
 bempp.api.global_parameters.assembly.potential_operator_assembly_type = "dense"
-bempp.api.global_parameters.hmat.eps = 1e-4
+bempp.api.global_parameters.hmat.eps = 1e-6
+print(bempp.api.global_parameters.hmat.eps)
 
 ta = time.time()
 
@@ -94,15 +95,21 @@ parser = argparse.ArgumentParser(description="Set parameters")
 parser.add_argument("--l0", default=0, type=int)
 parser.add_argument("--nrank", default=1, type=int)
 
+parser.add_argument("--prec", default=10, type=int)
+
 args = parser.parse_args()
 l0 = args.l0
 nrank = args.nrank
+prec = args.prec
 
 print(l0, "l0")
 
 
 precision_list = [2, 5, 10]
 precision = precision_list[l0]
+
+if prec != 10:
+    precision = prec
 
 h = 2.0 * np.pi / (precision * config["k_int"])
 
